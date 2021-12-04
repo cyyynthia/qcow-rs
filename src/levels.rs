@@ -118,34 +118,46 @@ impl L2Entry {
             ClusterDescriptor::Compressed(cluster) => {
                 match comp_type {
                     CompressionType::Zlib => {
-                        reader.seek(SeekFrom::Start(cluster.host_cluster_offset))
-                            .map_err(|_| io::Error::new(
-                                io::ErrorKind::UnexpectedEof,
-                                "Seeked past the end of the file attempting to read the current \
-                                cluster"
-                            ))?;
+                        #[cfg(feature = "zlib")]
+                        {
+                            reader.seek(SeekFrom::Start(cluster.host_cluster_offset))
+                                .map_err(|_| io::Error::new(
+                                    io::ErrorKind::UnexpectedEof,
+                                    "Seeked past the end of the file attempting to read the current \
+                                    cluster"
+                                ))?;
 
-                        let cluster_size = buf.len() as u64;
-                        let mut cluster = io::Cursor::new(buf);
-                        io::copy(
-                            &mut DeflateDecoder::new(reader).take(cluster_size),
-                            &mut cluster
-                        )?;
+                            let cluster_size = buf.len() as u64;
+                            let mut cluster = io::Cursor::new(buf);
+                            io::copy(
+                                &mut DeflateDecoder::new(reader).take(cluster_size),
+                                &mut cluster
+                            )?;
+                        }
+
+                        #[cfg(not(feature = "zlib"))]
+                        Err(io::Error::new(io::ErrorKind::Unsupported, "zlib compression is not supported"))
                     }
                     CompressionType::Zstd => {
-                        reader.seek(SeekFrom::Start(cluster.host_cluster_offset))
-                            .map_err(|_| io::Error::new(
-                                io::ErrorKind::UnexpectedEof,
-                                "Seeked past the end of the file attempting to read the current \
-                                cluster"
-                            ))?;
+                        #[cfg(feature = "zstd")]
+                        {
+                            reader.seek(SeekFrom::Start(cluster.host_cluster_offset))
+                                .map_err(|_| io::Error::new(
+                                    io::ErrorKind::UnexpectedEof,
+                                    "Seeked past the end of the file attempting to read the current \
+                                    cluster"
+                                ))?;
 
-                        let cluster_size = buf.len() as u64;
-                        let mut cluster = io::Cursor::new(buf);
-                        io::copy(
-                            &mut zstd::Decoder::new(reader)?.take(cluster_size),
-                            &mut cluster
-                        )?;
+                            let cluster_size = buf.len() as u64;
+                            let mut cluster = io::Cursor::new(buf);
+                            io::copy(
+                                &mut zstd::Decoder::new(reader)?.take(cluster_size),
+                                &mut cluster
+                            )?;
+                        }
+
+                        #[cfg(not(feature = "zstd"))]
+                        Err(io::Error::new(io::ErrorKind::Unsupported, "zstd compression is not supported"))
                     },
                 }
             },
