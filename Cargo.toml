@@ -19,6 +19,6 @@ flate2 = { version = "1", default-features = true, optional = true }
 zstd = { version = "0.9.0", optional = true }
 
 [features]
-default = ["zstd", "zlib", "flate2/zlib-ng-compat"]
+default = ["zstd", "zlib-ng"]
 zlib = ["flate2", "flate2/zlib"]
-wasm = ["zlib"]
+zlib-ng = ["zlib", "flate2/zlib-ng-compat"]

@@ -136,7 +136,7 @@ impl L2Entry {
                         }
 
                         #[cfg(not(feature = "zlib"))]
-                        Err(io::Error::new(io::ErrorKind::Unsupported, "zlib compression is not supported"))
+                        return Err(io::Error::new(io::ErrorKind::Unsupported, "zlib compression is not supported"));
                     }
                     CompressionType::Zstd => {
                         #[cfg(feature = "zstd")]
@@ -157,7 +157,7 @@ impl L2Entry {
                         }
 
                         #[cfg(not(feature = "zstd"))]
-                        Err(io::Error::new(io::ErrorKind::Unsupported, "zstd compression is not supported"))
+                        return Err(io::Error::new(io::ErrorKind::Unsupported, "zstd compression is not supported"));
                     },
                 }
             },
