@@ -3,6 +3,7 @@
 use crate::*;
 use std::io;
 
+#[cfg(feature = "zlib")]
 use flate2::read::DeflateDecoder;
 
 /// An entry in an L1 table that can be used to lookup the location of an L2 table
